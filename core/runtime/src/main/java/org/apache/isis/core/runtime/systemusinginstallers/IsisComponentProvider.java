@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
-import javax.jdo.annotations.PersistenceCapable;
 import javax.xml.bind.annotation.XmlElement;
 
 import org.apache.isis.applib.AppManifest;
@@ -181,6 +180,8 @@ public abstract class IsisComponentProvider {
         viewModelTypes.addAll(discovery.getTypesAnnotatedWith(ViewModel.class));
         viewModelTypes.addAll(discovery.getTypesAnnotatedWith(ViewModelLayout.class));
 
+        // TODO: this is a mistake, is meant to search for XmlRootElement
+        // However, changing to XmlRootElement introduces metamodel validation errors, so reverting.
         final Set<Class<?>> xmlElementTypes = _Sets.newLinkedHashSet();
         xmlElementTypes.addAll(discovery.getTypesAnnotatedWith(XmlElement.class));
 

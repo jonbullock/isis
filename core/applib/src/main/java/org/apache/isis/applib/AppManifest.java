@@ -247,6 +247,8 @@ public interface AppManifest {
             this.viewModelTypes = viewModelTypes;
         }
 
+        // TODO: this is a mistake, is meant to search for XmlRootElement
+        // However, changing to XmlRootElement introduces metamodel validation errors, so reverting.
         public Set<Class<?>> getXmlElementTypes() {
             return xmlElementTypes;
         }

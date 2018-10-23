@@ -19,8 +19,6 @@
 
 package org.apache.isis.core.metamodel.specloader.specimpl;
 
-import static org.apache.isis.commons.internal.base._NullSafe.stream;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -92,6 +90,8 @@ import org.apache.isis.core.metamodel.spec.feature.OneToOneAssociation;
 import org.apache.isis.core.metamodel.specloader.SpecificationLoader;
 import org.apache.isis.core.metamodel.specloader.facetprocessor.FacetProcessor;
 import org.apache.isis.objectstore.jdo.metamodel.facets.object.persistencecapable.JdoPersistenceCapableFacet;
+
+import static org.apache.isis.commons.internal.base._NullSafe.stream;
 
 public abstract class ObjectSpecificationAbstract extends FacetHolderImpl implements ObjectSpecification {
 
@@ -616,12 +616,8 @@ public abstract class ObjectSpecificationAbstract extends FacetHolderImpl implem
     }
 
 
-    private static ThreadLocal<Boolean> invalidatingCache = new ThreadLocal<Boolean>() {
-        @Override
-        protected Boolean initialValue() {
-            return Boolean.FALSE;
-        };
-    };
+    private static ThreadLocal<Boolean> invalidatingCache =
+            ThreadLocal.withInitial(() -> Boolean.FALSE);
 
     @Override
     public ObjectMember getMember(final String memberId) {

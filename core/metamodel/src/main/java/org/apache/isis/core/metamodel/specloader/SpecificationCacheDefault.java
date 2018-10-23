@@ -21,9 +21,13 @@ package org.apache.isis.core.metamodel.specloader;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
+import org.apache.isis.commons.internal.collections._Lists;
 import org.apache.isis.commons.internal.collections._Maps;
+import org.apache.isis.commons.internal.collections._Sets;
 import org.apache.isis.core.metamodel.facets.object.objectspecid.ObjectSpecIdFacet;
 import org.apache.isis.core.metamodel.spec.ObjectSpecId;
 import org.apache.isis.core.metamodel.spec.ObjectSpecification;
@@ -43,14 +47,17 @@ class SpecificationCacheDefault {
 
     private final Map<String, ObjectSpecification> specByClassName = _Maps.newHashMap();
     private Map<ObjectSpecId, String> classNameBySpecId;
+    private Set<String> ignoredClassNames;
 
     public ObjectSpecification get(final String className) {
         return specByClassName.get(className);
     }
 
     public void cache(final String className, final ObjectSpecification spec) {
+        ensureCachesConsistent();
         specByClassName.put(className, spec);
         recache(spec);
+        ensureCachesConsistent();
     }
 
 
@@ -94,12 +101,17 @@ class SpecificationCacheDefault {
             classNameBySpecId.put(objectSpecId, className);
             specByClassName.put(className, objectSpec);
         }
+
         this.classNameBySpecId = classNameBySpecId;
+        this.ignoredClassNames = _Sets.newHashSet();
+
         this.specByClassName.clear();
         this.specByClassName.putAll(specByClassName);
+        ensureCachesConsistent();
     }
 
     public ObjectSpecification remove(String typeName) {
+        ensureCachesConsistent();
         ObjectSpecification removed = specByClassName.remove(typeName);
         if(removed != null) {
             if(removed.containsDoOpFacet(ObjectSpecIdFacet.class)) {
@@ -109,6 +121,7 @@ class SpecificationCacheDefault {
                 classNameBySpecId.remove(specId);
             }
         }
+        ensureCachesConsistent();
         return removed;
     }
 
@@ -121,14 +134,37 @@ class SpecificationCacheDefault {
             // just ignore.
             return;
         }
+        final String className = spec.getCorrespondingClass().getName();
         if(!spec.containsDoOpFacet(ObjectSpecIdFacet.class)) {
-            return;
+            ignoredClassNames.add(className);
+        } else {
+            classNameBySpecId.put(spec.getSpecId(), className);
+            ignoredClassNames.remove(className);
         }
-        classNameBySpecId.put(spec.getSpecId(), spec.getCorrespondingClass().getName());
+        ensureCachesConsistent();
     }
 
     boolean isInitialized() {
         return classNameBySpecId != null;
     }
+
+    private void ensureCachesConsistent() {
+        // DISABLED...
+        if(false &&
+           isInitialized() && (specByClassName.size() != (classNameBySpecId.size() + ignoredClassNames.size())) ) {
+
+            final List<String> inSpecByClassNameNotIn = _Lists.newArrayList(specByClassName.keySet());
+            inSpecByClassNameNotIn.removeAll(classNameBySpecId.values());
+            inSpecByClassNameNotIn.removeAll(ignoredClassNames);
+
+            final List<String> inClassNameBySpecIdNotIn = _Lists.newArrayList(classNameBySpecId.values());
+            inClassNameBySpecIdNotIn.removeAll(specByClassName.keySet());
+
+            throw new IllegalStateException(
+                    String.format("Caches specByClassName and (classNameBySpecId + ignoredClassNames) differ in size! %d vs %d",
+                            specByClassName.size(), classNameBySpecId.size()));
+        }
+    }
+
 
 }
