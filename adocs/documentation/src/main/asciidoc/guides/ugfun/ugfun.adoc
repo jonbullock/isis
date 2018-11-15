@@ -12,7 +12,7 @@
 == Fundamentals
 
 This guide introduces the xref:../ugfun/ugfun.adoc#_ugfun_core-concepts[core concepts] and ideas behind Apache Isis,
-and tells you how to xref:../ugfun/ugfun.adoc#_ugfun_getting-started[get started] with a Maven archetype.
+and tells you how to xref:../ugfun/ugfun.adoc#_ugfun_getting-started_helloworld-archetype[get started] with a Maven archetype.
 
 It also describes a number of xref:../ugfun/ugfun.adoc#_ugfun_how-tos[how-to]s, describes how to influence the
 xref:../ugvw/ugvw.adoc#_ugvw_layout[UI layout] of your domain objects (this is ultimately just a type of metadata), and it
